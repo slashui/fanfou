@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 interface Post {
   time: string
@@ -19,12 +19,7 @@ export default function PostReviewer() {
   const [all_posts, set_all_posts] = useState<Post[]>([])
   const [loading, set_loading] = useState(true)
 
-  useEffect(() => {
-    load_posts()
-    load_progress()
-  }, [])
-
-  const load_posts = async () => {
+  const load_posts = useCallback(async () => {
     try {
       const response = await fetch('/wangxing_posts.json')
       const posts = await response.json()
@@ -37,7 +32,18 @@ export default function PostReviewer() {
     } finally {
       set_loading(false)
     }
-  }
+  }, [])
+
+  const load_progress = useCallback(() => {
+    const saved_progress = get_saved_progress()
+    set_progress(saved_progress)
+  }, [])
+
+  useEffect(() => {
+    load_posts()
+    load_progress()
+  }, [load_posts, load_progress])
+
 
   const get_saved_progress = (): Progress => {
     const saved_progress = localStorage.getItem('post_review_progress')
@@ -47,10 +53,6 @@ export default function PostReviewer() {
     return { current_index: 0, deleted_sequences: [] }
   }
 
-  const load_progress = () => {
-    const saved_progress = get_saved_progress()
-    set_progress(saved_progress)
-  }
 
   const save_progress = (new_progress: Progress) => {
     localStorage.setItem('post_review_progress', JSON.stringify(new_progress))

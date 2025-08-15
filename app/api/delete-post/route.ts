@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const posts = JSON.parse(file_content)
     
     // Filter out the post with matching sequence
-    const filtered_posts = posts.filter((post: any) => post.sequence !== sequence)
+    const filtered_posts = posts.filter((post: { sequence: number }) => post.sequence !== sequence)
     
     // Write back to file
     await fs.writeFile(file_path, JSON.stringify(filtered_posts, null, 2))
